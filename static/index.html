@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTEC Schedule Creator</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Google Fonts for Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation & Selection -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <h2>Creador Horarios UTEC</h2>
+                <p>Arma tu ciclo académico</p>
+            </div>
+            
+            <div class="filter-section">
+                <input type="text" id="courseSearch" placeholder="🔍 Buscar curso por nombre o código...">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-type="all">Todos</button>
+                    <button class="filter-btn" data-type="Obligatorio">Obligatorios</button>
+                    <button class="filter-btn" data-type="Electivo">Electivos</button>
+                </div>
+            </div>
+
+            <!-- List of Courses -->
+            <div class="course-list-container">
+                <ul id="courseList" class="course-list">
+                    <!-- Javascript will populate courses here -->
+                </ul>
+            </div>
+            
+            <div class="sidebar-actions">
+                <button id="exportExcelBtn" class="primary-btn" disabled>📥 Descargar Horario (.xlsx)</button>
+            </div>
+        </aside>
+
+        <!-- Main Calendar Area -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-status">
+                    <span id="conflictWarning" class="warning-badge hidden">⚠️ Conflicto de Horarios Detectado</span>
+                </div>
+                <!-- Dynamic Course Selection Details Panel -->
+                <div id="courseDetailsPanel" class="details-panel glass-panel hidden">
+                    <!-- Javascript will populate sections choices here when a course is clicked -->
+                </div>
+            </header>
+
+            <div class="calendar-wrapper glass-panel">
+                <div class="calendar-grid">
+                    <!-- Time Header Column -->
+                    <div class="time-col"></div>
+                    <!-- Days -->
+                    <div class="day-col" data-day="Lun"><div class="day-label">Lunes</div><div class="slots"></div></div>
+                    <div class="day-col" data-day="Mar"><div class="day-label">Martes</div><div class="slots"></div></div>
+                    <div class="day-col" data-day="Mie"><div class="day-label">Miércoles</div><div class="slots"></div></div>
+                    <div class="day-col" data-day="Jue"><div class="day-label">Jueves</div><div class="slots"></div></div>
+                    <div class="day-col" data-day="Vie"><div class="day-label">Viernes</div><div class="slots"></div></div>
+                    <div class="day-col" data-day="Sab"><div class="day-label">Sábado</div><div class="slots"></div></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Modular Scripts -->
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/calendar.js"></script>
+    <script src="/static/js/ui.js"></script>
+</body>
+</html>
