@@ -1,10 +1,19 @@
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, send_file
 from flask_cors import CORS
 import os
-from database import db, Course
+import io
+from database import db, Course, Section, Schedule
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 app = Flask(__name__, static_folder='../static')
-CORS(app)
+
+# 1. SEGURIDAD: Configuración de CORS y Secret Key
+# Permitimos localhost por defecto para desarrollo.
+ALLOWED_ORIGINS = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000').split(',')
+CORS(app, origins=ALLOWED_ORIGINS)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.urandom(24).hex())
 
 # Configuration for Database
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -36,13 +45,6 @@ def get_courses():
     courses = query.all()
     return jsonify([course.to_dict() for course in courses])
 
-from flask import send_file
-import io
-from database import Section, Schedule
-from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.utils import get_column_letter
-
 # --- Color palette for courses (hex without #) ---
 COURSE_COLORS = [
     '2563EB', '7C3AED', '059669', 'DC2626', 'D97706',
@@ -63,10 +65,19 @@ def _time_to_row(time_str, start_hour=7):
 def export_schedule():
     """ Generates a formatted weekly schedule as an Excel file """
     data = request.json
-    if not data or 'sections' not in data:
-        return jsonify({'error': 'No sections provided'}), 400
+    
+    # 2. SEGURIDAD: Validación de entrada
+    if not data or 'sections' not in data or not isinstance(data['sections'], list):
+        return jsonify({'error': 'Formato de datos inválido'}), 400
 
-    section_ids = data['sections']
+    # Limitar a un máximo de 100 secciones y asegurar que sean enteros
+    try:
+        section_ids = [int(s) for s in data['sections'][:100]]
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Los IDs de las secciones deben ser numéricos'}), 400
+
+    if not section_ids:
+         return jsonify({'error': 'No sections provided'}), 400
 
     # Query Database
     results = (
@@ -234,4 +245,6 @@ def export_schedule():
 
 if __name__ == '__main__':
     print("Initializing Flask MVC Backend...")
-    app.run(debug=True, port=5000)
+    # 3. SEGURIDAD: DEBUG desactivado por defecto para evitar exposición de errores en producción
+    IS_DEBUG = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=IS_DEBUG, port=5000)
